@@ -4,7 +4,25 @@ import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-load
 mapboxgl.accessToken = 'pk.eyJ1IjoiY29ybWFjbWNhIiwiYSI6ImNsMHR2M3d0NTAwNzQzY21vMGlneGF3ZWEifQ.AGMAoX7Am6YDr6DgxIzGDg';
 
 
+console.log('hello');
 
+async function fetchCitiesData() {
+    try {
+        // const response = await fetch('https://en.wikipedia.org/w/index.php?title=Module:Russo-Ukrainian_War_detailed_map&action=raw');
+        const response = await fetch('https://en.wikipedia.org/w/api.php?action=parse&page=Module:Russo-Ukrainian_War_detailed_map&format=json&origin=*');
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        const citiesData = await response.json();
+        return citiesData;
+    }
+    catch(error) {
+        console.error(`Could not get cities data ${error}`)
+    }
+}
+
+const citiesDataPromise = fetchCitiesData();
+citiesDataPromise.then((citiesData) => console.log(citiesData));
 
 
 export default function App() {
@@ -23,8 +41,10 @@ export default function App() {
             center: [lng, lat],
             zoom: zoom
         });
-        //nav.current = new mapboxgl.NavigationControl();
-        map.current.addControl(new mapboxgl.NavigationControl());
+        
+        map.current.addControl(new mapboxgl.NavigationControl({
+            showCompass: false
+        }));
     });
     return (
         <div>
