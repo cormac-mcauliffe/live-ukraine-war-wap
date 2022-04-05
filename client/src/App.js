@@ -8,8 +8,8 @@ console.log('hello');
 
 async function fetchCitiesData() {
     try {
-        // const response = await fetch('https://en.wikipedia.org/w/index.php?title=Module:Russo-Ukrainian_War_detailed_map&action=raw');
-        const response = await fetch('https://en.wikipedia.org/w/api.php?action=parse&page=Module:Russo-Ukrainian_War_detailed_map&format=json&origin=*');
+        // const response = await fetch('https://en.wikipedia.org/w/index.php?title=Module:Russo-Ukrainian_War_detailed_map&action=raw');//
+        const response = await fetch('/api/hello');
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
         }
