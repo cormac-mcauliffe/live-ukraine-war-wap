@@ -6,14 +6,32 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY29ybWFjbWNhIiwiYSI6ImNsMHR2M3d0NTAwNzQzY21vM
 
 console.log('hello');
 
-async function fetchCitiesData() {
+async function fetchServerHello() {
     try {
         // const response = await fetch('https://en.wikipedia.org/w/index.php?title=Module:Russo-Ukrainian_War_detailed_map&action=raw');//
         const response = await fetch('/api/hello');
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
         }
-        const citiesData = await response.json();
+        const serverHello = await response.json();
+        return serverHello;
+    }
+    catch(error) {
+        console.error(`Could not get hello ${error}`)
+    }
+}
+
+const serverHelloPromise = fetchServerHello();
+serverHelloPromise.then((serverHello) => console.log(serverHello));
+
+async function fetchCitiesData() {
+    try {
+        // const response = await fetch('https://en.wikipedia.org/w/index.php?title=Module:Russo-Ukrainian_War_detailed_map&action=raw');//
+        const response = await fetch('/api/citiesData');
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        const citiesData = await response.text();
         return citiesData;
     }
     catch(error) {
