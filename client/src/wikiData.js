@@ -33,7 +33,7 @@ async function fetchCitiesDataRaw() {
 
 // Function to parse raw text string to GeoJSON
 function parseToGeoJson(citiesDataRaw) { 
-    console.log(citiesDataRaw);
+    
     const oblastTemplate = ["--Cherkasy Oblast","--Chernihiv Oblast","--Chernivtsi Oblast","--Dnipropetrovsk Oblast","--Donetsk Oblast","--Ivano-Frankivsk Oblast","--Kharkiv Oblast","--Kherson Oblast","--Khmelnytskyi Oblast","--Kyiv City","--Kyiv Oblast","--Kirovohrad Oblast","--Luhansk Oblast","--Lviv Oblast","--Mykolaiv Oblast","--Odessa Oblast","--Poltava Oblast","--Rivne Oblast","--Sumy Oblast","--Ternopil Oblast","--Vinnytsia Oblast","--Volyn Oblast","--Zakarpattia Oblast","--Zaporizhzhia Oblast","--Zhytomyr Oblast","--Crimea","containerArgs ="];
 
     let oblastString;
@@ -46,7 +46,7 @@ function parseToGeoJson(citiesDataRaw) {
         "type": "Feature",
         "geometry": {
             "type": "Point",
-            "coordinates": []
+            "coordinates": [0 , 0]
         },
         "properties": {}
     };
@@ -69,21 +69,21 @@ function parseToGeoJson(citiesDataRaw) {
 
         while ( oblastString.indexOf("{ lat = \"", anchorIndex) !== -1 ) {
             // extract coordinates
-            // lat
+            // lat (note that GeoJSON coordinate format is [ long , lat ], rather than the reverse order as in the wiki data )
             // note that the anchorIndex has been either set to zero if it's the first iteration of this inner loop, or it has already been updated at the end of the previous iteration
             startSubstring = "{ lat = \"";
             endSubstring = "\", long = \"";
             startIndex = oblastString.indexOf(startSubstring, anchorIndex) + startSubstring.length;
             endIndex = oblastString.indexOf(endSubstring, anchorIndex);
             stringCut = oblastString.substring(startIndex, endIndex);
-            featureObject.geometry.coordinates = [Number(stringCut)];
+            featureObject.geometry.coordinates[1] = Number(stringCut);
             //long
             anchorIndex = endIndex + endSubstring.length; // update the anchor index
             endSubstring = "\", mark = \"";
             startIndex = anchorIndex;
             endIndex = oblastString.indexOf(endSubstring, anchorIndex);
             stringCut = oblastString.substring(startIndex, endIndex);
-            featureObject.geometry.coordinates.push(Number(stringCut));
+            featureObject.geometry.coordinates[0] = Number(stringCut);
 
             // extract mark icon type
             anchorIndex = endIndex + endSubstring.length; // update the anchor index
@@ -105,9 +105,8 @@ function parseToGeoJson(citiesDataRaw) {
             // extract oblast name
             featureObject.properties.oblast = oblastTemplate[i].slice(2);
 
-            // console.log(oblastString);
+            // add to GeoJson output
             outputGeoJson.features.push(featureObject);
-            console.log(featureObject);
 
             // set the anchor index for the next iteration of the loop
             anchorIndex = endIndex + endSubstring.length;
@@ -116,15 +115,15 @@ function parseToGeoJson(citiesDataRaw) {
                 "type": "Feature",
                 "geometry": {
                     "type": "Point",
-                    "coordinates": []
+                    "coordinates": [0, 0]
                 },
                 "properties": {}
             };
         }
-        console.log(outputGeoJson);
+
     }
 
-    console.log(outputGeoJson);
+    console.log(JSON.stringify(outputGeoJson));
 
 }
 
