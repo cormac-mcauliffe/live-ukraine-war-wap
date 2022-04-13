@@ -113,7 +113,7 @@ function parseToGeoJson(citiesDataRaw) {
             labelSubstringIndex = oblastString.indexOf(labelSubstring, anchorIndex); // Initialise index that we'll use to deal with the exceptions to the dominent label syntax.
 
              // two of the features on the wiki map do not have labels at all. These are the seige icons for "Horlivka" in Donetsk Oblast, and "Huliaipole" in "Zaporizhzhia Oblast". Manually include a label for these two cases.
-            if (labelSubstringIndex > oblastString.indexOf("{ lat = \"", anchorIndex)) { 
+            if ((labelSubstringIndex > oblastString.indexOf("{ lat = \"", anchorIndex)) && (oblastString.indexOf("{ lat = \"", anchorIndex) > -1)) { 
                 if ( oblastTemplate[i].slice(2) === "Donetsk Oblast" ) { 
                     featureObject.properties.label = "Horlivka";
                 } else if ( oblastTemplate[i].slice(2) === "Zaporizhzhia Oblast" )        
