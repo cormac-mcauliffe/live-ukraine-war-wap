@@ -207,16 +207,21 @@ function parseToGeoJson(citiesDataRaw) {
     // TEST: Check global parsing test result
     console.log(`Global test pass in all oblasts = ${testGlobal}`)
 
-    // Output GeoJson
-    console.log(JSON.stringify(outputGeoJson));
+    // return the GeoJSON object stringified as JSON
+    return JSON.stringify(outputGeoJson);
 
 }
 
 // Initiate data fetch from wiki. Remember the asyn functions always return a promise
-const citiesDataPromise = fetchCitiesDataRaw();
-
+// const citiesDataPromise = fetchCitiesDataRaw();
 // Parse resolved promise from raw text string to GeoJSON
-citiesDataPromise.then( parseToGeoJson );
+// citiesDataPromise.then( parseToGeoJson );
+
+// Export loading + parsing functions as single function
+export default async function loadCitiesGeoJson() { 
+    const geoJson = fetchCitiesDataRaw().then(parseToGeoJson);
+    return geoJson;
+}
 
 // This returns as 'undefined' meaning that it's value hasn't been declared because it is exectued synchronously before citiesDataPromise resolves above. I will need to put all of the GeoJSON parsing logic into a function and pass that as a handler function into the Promise's then() method (citiesDataPromise being the promise here) 
 // console.log(citiesDataRaw);
