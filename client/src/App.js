@@ -9,7 +9,7 @@ export default function App() {
     const map = useRef(null);
     const lng = 31.39;
     const lat = 48.67;
-    const zoom = 4.41;
+    const zoom = 5.6;
     // let citiesGeoJson;
     // let citiesObj;
 
@@ -44,19 +44,32 @@ export default function App() {
                 data: citiesObj,
             });
 
-            
+            // Add filtered red layer for Russian controlled mark names: ["Location dot red.svg","Fighter-jet-red-icon.svg","Anchor pictogram red.svg","Icon NuclearPowerPlant-red.svg"]
             map.current.addLayer({
-                'id': 'noStatus',
+                'id': 'russianControlled',
                 'source': 'wikiData',
                 'type': 'circle',
                 'paint': {
-                    'circle-color': '#4264fb',
+                    'circle-color': '#F7455D',
+                    'circle-radius': 5,
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#ffffff'//'#F7455D' //'#33C9EB'
+                },
+                'filter': ['in', ['get', 'mark'], ["literal",["Location dot red.svg","Fighter-jet-red-icon.svg","Anchor pictogram red.svg","Icon NuclearPowerPlant-red.svg"]]]
+            });
+
+            // Add filtered layer for Ukrainian controlled locations currently under active Russian pressure: ["80x80-red-blue-anim.gif","Map-arcNE-red.svg","Map-arcSE-red.svg","Map-circle-red.svg"]
+            map.current.addLayer({
+                'id': 'russianPressure',
+                'source': 'wikiData',
+                'type': 'circle',
+                'paint': {
+                    'circle-color': '#333EFF',//"#0057B8",//#33C9EB',
                     'circle-radius': 4,
                     'circle-stroke-width': 2,
-                    'circle-stroke-color': '#ffffff'
-                }
-            });
-            
+                    'circle-stroke-color': '#F7455D' //'#33C9EB'
+                },
+                'filter': ['in', ['get', 'mark'], ["literal",["80x80-red-blue-anim.gif","Map-arcNE-red.svg","Map-arcSE-red.svg","Map-circle-red.svg"]]]});
         })
 
     });
