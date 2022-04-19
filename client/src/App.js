@@ -60,7 +60,7 @@ export default function App() {
 
             // Add filtered layer for Ukrainian controlled locations currently under active Russian pressure: ["80x80-red-blue-anim.gif","Map-arcNE-red.svg","Map-arcSE-red.svg","Map-circle-red.svg"]
             map.current.addLayer({
-                'id': 'russianPressure',
+                'id': 'russianPressured',
                 'source': 'wikiData',
                 'type': 'circle',
                 'paint': {
@@ -75,7 +75,11 @@ export default function App() {
     });
     return (
         <div>
-          <div ref={mapContainer} className="map-container" />
-        </div>
+            <div ref={mapContainer} className="map-container" />
+            <div id="state-legend" className="legend">
+                <div><span id="russian-control"></span>Russian occupied</div>
+                <div><span id="russian-pressure"></span>Under Russian pressure</div>
+            </div>
+         </div>
       );
 }

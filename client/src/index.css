@@ -1,4 +1,35 @@
+/* Map */
 .map-container {
     height: 950px;
   }
+
+/* Legend */
+.legend {
+  background-color: #fff;
+  border-radius: 3px;
+  bottom: 45px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  padding: 10px;
+  position: absolute;
+  right: 20px;
+  z-index: 1;
+  }
   
+.legend div span {
+border-radius: 50%;
+display: inline-block;
+height: 10px;
+margin-right: 5px;
+width: 10px;
+}
+
+#russian-control {
+  background-color: #F7455D;
+  box-shadow: 0 0 0 1px #F7455D;
+}
+
+#russian-pressure {
+  background-color: #333EFF;
+  box-shadow: 0 0 0 2px #F7455D;
+}
