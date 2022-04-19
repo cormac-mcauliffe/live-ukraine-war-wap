@@ -79,6 +79,7 @@ export default function App() {
             <div id="state-legend" className="legend">
                 <div><span id="russian-control"></span>Russian occupied</div>
                 <div><span id="russian-pressure"></span>Under Russian pressure</div>
+                <p id="wiki-source">Live Russo-Ukrainian war data <br></br> pulled from <a href="https://en.wikipedia.org/wiki/Module:Russo-Ukrainian_War_detailed_map" target="_blank" rel="noopener noreferrer">Wikipedia</a></p>
             </div>
          </div>
       );
