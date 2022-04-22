@@ -1,6 +1,6 @@
 import React, {useRef, useEffect } from 'react';
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
-import loadCitiesGeoJson from './wikiData.js';
+import loadGeoJson from './wikiData.js';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiY29ybWFjbWNhIiwiYSI6ImNsMHR2M3d0NTAwNzQzY21vMGlneGF3ZWEifQ.AGMAoX7Am6YDr6DgxIzGDg';
 
@@ -27,16 +27,16 @@ export default function App() {
         // Once the map has loaded, import the Ukraine wiki map data as GeoJSON string and apply filtered data layers to the map; 
 
         // Variables for storing the wiki data
-        let citiesGeoJson;
+        //let citiesGeoJson;
         let citiesObj;
         
         map.current.on('load', () => {
             // Place all asyn data loading and display logic inside an async IIFE - Immediately Invoked Function Expression
             // This allows us to only start adding the data to the map until after the promise returned by the imported (and async) function loadCitiesGeoJson has been resolved to the GeoJSON string.
             (async () => { 
-                citiesGeoJson = await loadCitiesGeoJson();
+                citiesObj = await loadGeoJson();
                 // parse the JSON to deliver value a GeoJSON obj
-                citiesObj = await JSON.parse(citiesGeoJson);
+                // citiesObj = await JSON.parse(citiesGeoJson);
                 // If we did not use await above then this would log a promise rather than the GeoJSON object.
                 console.log(citiesObj);
                 // add the geoJSON as a data source to the map

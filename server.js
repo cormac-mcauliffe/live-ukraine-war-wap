@@ -1,5 +1,5 @@
 const express = require('express');
-const fetch = require('node-fetch');
+const { loadCitiesGeoJson } = require('./mapdata.js');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -18,23 +18,9 @@ app.post('/api/world', (req, res) => {
   );
 });
 
-async function fetchCitiesData() {
-    try {
-        const response = await fetch('https://en.wikipedia.org/w/index.php?title=Module:Russo-Ukrainian_War_detailed_map&action=raw');
-        if (!response.ok) {
-            throw new Error(`HTTP error: ${response.status}`);
-        }
-        const citiesData = await response.text();
-        return citiesData;
-        }
-        catch(error) {
-        console.log(error);
-        }
-}
-
 app.get('/api/citiesData', async (req, res) => {
-    const citiesDataPromise = fetchCitiesData();
-    citiesDataPromise.then((citiesData) => res.send(citiesData));
+    const citiesDataGeoJson = loadCitiesGeoJson();
+    citiesDataGeoJson.then((citiesData) => res.send(citiesData));
   });
 
 
