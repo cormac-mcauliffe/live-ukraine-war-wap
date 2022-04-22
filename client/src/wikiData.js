@@ -23,6 +23,13 @@ async function fetchCitiesDataRaw() {
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
         }
+        /* await new Promise((resolve, reject) => {
+            // Force data fectching function to 'await' for 3 seconds to test for 
+            // app response to a server delay
+            setTimeout( function() {
+              resolve("Waited 3 seconds") 
+            }, 3000)
+          });*/
         const citiesDataRaw = await response.text();
         return citiesDataRaw;
     }
