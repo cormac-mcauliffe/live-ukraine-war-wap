@@ -1,5 +1,6 @@
 const express = require('express');
 const { loadCitiesGeoJson } = require('./mapdata.js');
+const { DataCache } = require('./datacache.js');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -7,21 +8,25 @@ const port = process.env.PORT || 3001;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/api/hello', (req, res) => {
-  res.send({ express: 'Hello From Express' });
-});
+// Iniate the self-resetting cache to be the latest Ukraine data fetched from Wikipedia
+// and parsed to GeoJSON
+const citiesDataGeoJson = new DataCache(loadCitiesGeoJson, .5);
 
-app.post('/api/world', (req, res) => {
-  console.log(req.body);
-  res.send(
-    `I received your POST request. This is what you sent me: ${req.body.post}`,
-  );
-});
+// performance measurement variables
+let t0, t1;
 
+// Pull latest version of Ukraine data from the cache and send to client
 app.get('/api/citiesData', async (req, res) => {
-    const citiesDataGeoJson = loadCitiesGeoJson();
-    citiesDataGeoJson.then((citiesData) => res.send(citiesData));
-  });
-
+  t0 = performance.now();
+  citiesDataGeoJson.getData()
+    .then(
+      (citiesData) => { 
+        res.send(citiesData);
+        t1 = performance.now();
+        console.log(`Time taken for BE to send wikiData to FE: ${t1 - t0} milliseconds.`); 
+      }
+    );
+  }
+);
 
 app.listen(port, () => console.log(`Listening on port ${port}`));

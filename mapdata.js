@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 
-// Function to fetch Ukrainian towns and cities wiki data as a raw text string
+// Function to fetch Ukrainian cities wiki data as a raw text string
 async function fetchCitiesDataRaw() {
     try {
         const response = await fetch('https://en.wikipedia.org/w/index.php?title=Module:Russo-Ukrainian_War_detailed_map&action=raw');
@@ -49,10 +49,19 @@ function parseToGeoJson(citiesDataRaw) {
     let startSubstring;
     let endSubstring;
     let stringCut;
-    // the 'label =' property extraction has 4 different syntax cases. These variables will be use to surgically cater for each of the case.
+    // the 'label =' property extraction from the wikipedia data has 4 different syntax cases. These variables will be use to surgically cater for each of the case.
     let labelSubstring = "label =";
     let labelSubstringIndex;
     let labelSubstringCut;
+    /*
+    function extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut) {
+        startIndex = labelSubstringIndex + startSubstring.length;
+        endIndex = oblastString.indexOf(endSubstring, anchorIndex);
+        stringCut = oblastString.substring(startIndex, endIndex);
+        return stringCut;
+    };
+    */
+    
 
     // TEST: test variables
     let testLocal;
@@ -62,7 +71,7 @@ function parseToGeoJson(citiesDataRaw) {
     let testCountGeoJson;
 
     
-    // Break up string into an object of properties where the key for each property is the oblast name and the value is the raw text string associated with it. Note that the '--' signature substring before each oblast name is necessary for reliable extraction as without it the string '** oblast' sometimes appears mixed inside the cities data as part of the location name data.
+    // Iterate through the global raw text string by cutting out the part of string associated with each oblast. Note that the '--' signature substring before each oblast name is necessary for reliable extraction as without it the string 'oblast' sometimes appears mixed inside the cities data as part of the location name data.
     for ( let i = 0; i < (oblastTemplate.length - 1 ); i++ ) {
         startIndex = citiesDataRaw.indexOf(oblastTemplate[i]);
         endIndex = citiesDataRaw.indexOf(oblastTemplate[i + 1]);
@@ -103,16 +112,53 @@ function parseToGeoJson(citiesDataRaw) {
             anchorIndex = endIndex + endSubstring.length; // update the anchor index
             labelSubstringIndex = oblastString.indexOf(labelSubstring, anchorIndex); // Initialise index that we'll use to deal with the exceptions to the dominent label syntax.
 
-             // two of the features on the wiki map do not have labels at all. These are the seige icons for "Horlivka" in Donetsk Oblast, and "Huliaipole" in "Zaporizhzhia Oblast". Manually include a label for these two cases.
+            // Handle the syntax exceptions
+             // Two of the features on the wiki map do not have labels at all. These are the seige icons for "Horlivka" in Donetsk Oblast, and "Huliaipole" in "Zaporizhzhia Oblast". Manually include a label for these two cases.
             if ((labelSubstringIndex > oblastString.indexOf("{ lat = \"", anchorIndex)) && (oblastString.indexOf("{ lat = \"", anchorIndex) > -1)) { 
-                if ( oblastTemplate[i].slice(2) === "Donetsk Oblast" ) { 
+                /* 
+                switch (oblastTemplate[i].slice(2)) {
+                    case "Donetsk Oblast":
+                        featureObject.properties.label = "Horlivka";
+                        break;
+                    case "Zaporizhzhia Oblast":
+                        featureObject.properties.label = "Huliaipole";
+                        break;
+                }
+                */
+                if ( oblastTemplate[i].slice(2) === "Donetsk Oblast") { 
                     featureObject.properties.label = "Horlivka";
-                } else if ( oblastTemplate[i].slice(2) === "Zaporizhzhia Oblast" )        
+                } else if ( oblastTemplate[i].slice(2) === "Zaporizhzhia Oblast" && featureObject.geometry.coordinates[0] === 36.273) {        
                     featureObject.properties.label = "Huliaipole";
+                } else if ( oblastTemplate[i].slice(2) === "Zaporizhzhia Oblast" && featureObject.geometry.coordinates[0] === 35.788 ) {
+                    featureObject.properties.label = "Orikhiv";
+                }
             } else { 
                 // As long as we are not dealing with one of the features with no label, we can process the labels property as follows. 
                 // Need if statements to handle the four syntax cases that follows the labelSubtring of 'label =' syntax
                 labelSubstringCut = oblastString.substring(labelSubstringIndex);
+                /*
+                if( labelSubstringCut.startsWith("label = \"[[") ) {
+                    startSubstring = "label = \"[[";
+                    endSubstring = "]]\",";
+                    featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
+                } else if ( labelSubstringCut.startsWith("label = \"") ) {
+                    startSubstring = "label = \"";
+                    endSubstring = "\",";
+                    featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
+                } else if ( labelSubstringCut.startsWith("label = \" [[") ) {
+                    startSubstring = "label = \" [[";
+                    endSubstring = "]]\",";
+                    featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
+                } else if ( labelSubstringCut.startsWith("label = [[") ) {
+                    startSubstring = "label = [[";
+                    endSubstring = "]],";
+                    featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
+                } else if ( labelSubstringCut.startsWith("label =\"") ) {
+                    startSubstring = "label =\"";
+                    endSubstring = "\",";
+                    featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
+                } 
+                */
                 
                 if( labelSubstringCut.startsWith("label = \"[[") ) {
                     startSubstring = "label = \"[[";
@@ -150,6 +196,7 @@ function parseToGeoJson(citiesDataRaw) {
                     stringCut = oblastString.substring(startIndex, endIndex);
                     featureObject.properties.label = stringCut;
                 } 
+                
             };
 
             // extract oblast name
@@ -203,11 +250,11 @@ function parseToGeoJson(citiesDataRaw) {
 
 }
 
-// Export loading + parsing functions as single function. Remember that asyn functions always return a promise
-
+// Export loading + parsing functions as single function 
+// Remember that async functions always return a promise
 async function loadCitiesGeoJson() { 
     const geoJson = fetchCitiesDataRaw().then(parseToGeoJson);
-    return geoJson;
+    return await geoJson;
 }
 
 module.exports = { 
