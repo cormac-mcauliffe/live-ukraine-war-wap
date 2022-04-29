@@ -72,7 +72,11 @@ export default function App() {
                     },
                     'filter': ['any',
                         ['in', ['get', 'mark'], ["literal",["80x80-red-blue-anim.gif","Map-arcNE-red.svg","Map-arcSE-red.svg","Map-circle-red.svg"]]],
-                        ['in', ['get', 'label'], ["literal",["Azovstal Metallurgical Combine"]]]
+                        // "Azovstall Metallurgical Combine" needs explicit treatment due to the unique way it appears in the wikipedia data
+                        ['all',
+                            ['in', ['get', 'label'], ["literal",["Azovstal Metallurgical Combine"]]],
+                            ['in', ['get', 'mark'], ["literal",["Icon NuclearPowerPlant-blue.svg"]]]
+                        ]
                     ]
                 });
             })();
