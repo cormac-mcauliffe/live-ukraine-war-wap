@@ -18,15 +18,14 @@ async function fetchCitiesDataRaw() {
         return citiesDataRaw;
     }
     catch(error) {
-        console.error(`Backend could not get cities data ${error}`)
+        console.error(`Backend could not get cities data ${error}`);
     }
 }
 
 // Function to parse raw text string to GeoJSON
 function parseToGeoJson(citiesDataRaw) { 
-    
+    // INITIALISE VARIABLES    
     const oblastTemplate = ["--Cherkasy Oblast","--Chernihiv Oblast","--Chernivtsi Oblast","--Dnipropetrovsk Oblast","--Donetsk Oblast","--Ivano-Frankivsk Oblast","--Kharkiv Oblast","--Kherson Oblast","--Khmelnytskyi Oblast","--Kyiv City","--Kyiv Oblast","--Kirovohrad Oblast","--Luhansk Oblast","--Lviv Oblast","--Mykolaiv Oblast","--Odessa Oblast","--Poltava Oblast","--Rivne Oblast","--Sumy Oblast","--Ternopil Oblast","--Vinnytsia Oblast","--Volyn Oblast","--Zakarpattia Oblast","--Zaporizhzhia Oblast","--Zhytomyr Oblast","--Crimea","containerArgs ="];
-
     let oblastString;
     let outputGeoJson = {
         "type": "FeatureCollection",
@@ -41,27 +40,24 @@ function parseToGeoJson(citiesDataRaw) {
         },
         "properties": {}
     };
-
+    // index variables
     let startIndex;
     let endIndex;
-    // this index will allow us to maintain position as we sweep through the string
+    // this anchor index will allow us to maintain and progress our absolute position as we sweep through the string
     let anchorIndex;
     let startSubstring;
     let endSubstring;
     let stringCut;
-    // the 'label =' property extraction from the wikipedia data has 4 different syntax cases. These variables will be use to surgically cater for each of the case.
+    // the 'label =' property extraction from the wikipedia data has 5 different syntax cases. These variables and function will be use to surgically cater for each of the case.
     let labelSubstring = "label =";
     let labelSubstringIndex;
     let labelSubstringCut;
-    /*
     function extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut) {
         startIndex = labelSubstringIndex + startSubstring.length;
-        endIndex = oblastString.indexOf(endSubstring, anchorIndex);
+        endIndex = oblastString.indexOf(endSubstring, startIndex);
         stringCut = oblastString.substring(startIndex, endIndex);
         return stringCut;
     };
-    */
-    
 
     // TEST: test variables
     let testLocal;
@@ -70,7 +66,6 @@ function parseToGeoJson(citiesDataRaw) {
     let testCountRaw;
     let testCountGeoJson;
 
-    
     // Iterate through the global raw text string by cutting out the part of string associated with each oblast. Note that the '--' signature substring before each oblast name is necessary for reliable extraction as without it the string 'oblast' sometimes appears mixed inside the cities data as part of the location name data.
     for ( let i = 0; i < (oblastTemplate.length - 1 ); i++ ) {
         startIndex = citiesDataRaw.indexOf(oblastTemplate[i]);
@@ -83,7 +78,7 @@ function parseToGeoJson(citiesDataRaw) {
         testCountGeoJson = 0; // TEST: initialise the test counter for the number of features extracted to GeoJSON (feature extraction test at end of while loop on each oblast)
 
         while ( oblastString.indexOf("{ lat = \"", anchorIndex) !== -1 ) { 
-            // extract coordinates
+            // EXTRACT COORDINATES
             // lattitude (note that GeoJSON coordinate format is [ long , lat ], rather than the reverse order as in the wiki data )
             // note that the anchorIndex has been either set to zero if it's the first iteration of this inner loop, or it has already been updated at the end of the previous iteration
             startSubstring = "{ lat = \"";
@@ -92,7 +87,7 @@ function parseToGeoJson(citiesDataRaw) {
             endIndex = oblastString.indexOf(endSubstring, anchorIndex);
             stringCut = oblastString.substring(startIndex, endIndex);
             featureObject.geometry.coordinates[1] = Number(stringCut);
-            //longitude
+            // longitude
             anchorIndex = endIndex + endSubstring.length; // update the anchor index
             endSubstring = "\", mark = \"";
             startIndex = anchorIndex;
@@ -100,7 +95,7 @@ function parseToGeoJson(citiesDataRaw) {
             stringCut = oblastString.substring(startIndex, endIndex);
             featureObject.geometry.coordinates[0] = Number(stringCut);
 
-            // extract mark icon type
+            // EXTRACT MARK ICON TYPE
             anchorIndex = endIndex + endSubstring.length; // update the anchor index
             endSubstring = "\"";
             startIndex = anchorIndex;
@@ -108,23 +103,13 @@ function parseToGeoJson(citiesDataRaw) {
             stringCut = oblastString.substring(startIndex, endIndex);
             featureObject.properties.mark = stringCut;
 
-            //extract label of feature
+            // EXTRACT LABEL OF FEATURE
             anchorIndex = endIndex + endSubstring.length; // update the anchor index
             labelSubstringIndex = oblastString.indexOf(labelSubstring, anchorIndex); // Initialise index that we'll use to deal with the exceptions to the dominent label syntax.
 
             // Handle the syntax exceptions
-             // Two of the features on the wiki map do not have labels at all. These are the seige icons for "Horlivka" in Donetsk Oblast, and "Huliaipole" in "Zaporizhzhia Oblast". Manually include a label for these two cases.
+            // A small number of the features on the wiki map do not have labels at all. Manually include a label for these cases.
             if ((labelSubstringIndex > oblastString.indexOf("{ lat = \"", anchorIndex)) && (oblastString.indexOf("{ lat = \"", anchorIndex) > -1)) { 
-                /* 
-                switch (oblastTemplate[i].slice(2)) {
-                    case "Donetsk Oblast":
-                        featureObject.properties.label = "Horlivka";
-                        break;
-                    case "Zaporizhzhia Oblast":
-                        featureObject.properties.label = "Huliaipole";
-                        break;
-                }
-                */
                 if ( oblastTemplate[i].slice(2) === "Donetsk Oblast") { 
                     featureObject.properties.label = "Horlivka";
                 } else if ( oblastTemplate[i].slice(2) === "Zaporizhzhia Oblast" && featureObject.geometry.coordinates[0] === 36.273) {        
@@ -136,18 +121,17 @@ function parseToGeoJson(citiesDataRaw) {
                 // As long as we are not dealing with one of the features with no label, we can process the labels property as follows. 
                 // Need if statements to handle the four syntax cases that follows the labelSubtring of 'label =' syntax
                 labelSubstringCut = oblastString.substring(labelSubstringIndex);
-                /*
                 if( labelSubstringCut.startsWith("label = \"[[") ) {
                     startSubstring = "label = \"[[";
+                    endSubstring = "]]\",";
+                    featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
+                } else if ( labelSubstringCut.startsWith("label = \" [[") ) {
+                    startSubstring = "label = \" [[";
                     endSubstring = "]]\",";
                     featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
                 } else if ( labelSubstringCut.startsWith("label = \"") ) {
                     startSubstring = "label = \"";
                     endSubstring = "\",";
-                    featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
-                } else if ( labelSubstringCut.startsWith("label = \" [[") ) {
-                    startSubstring = "label = \" [[";
-                    endSubstring = "]]\",";
                     featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
                 } else if ( labelSubstringCut.startsWith("label = [[") ) {
                     startSubstring = "label = [[";
@@ -158,51 +142,18 @@ function parseToGeoJson(citiesDataRaw) {
                     endSubstring = "\",";
                     featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
                 } 
-                */
-                
-                if( labelSubstringCut.startsWith("label = \"[[") ) {
-                    startSubstring = "label = \"[[";
-                    endSubstring = "]]\",";
-                    startIndex = labelSubstringIndex + startSubstring.length;
-                    endIndex = oblastString.indexOf(endSubstring, anchorIndex);
-                    stringCut = oblastString.substring(startIndex, endIndex);
-                    featureObject.properties.label = stringCut;
-                } else if ( labelSubstringCut.startsWith("label = \"") ) {
-                    startSubstring = "label = \"";
-                    endSubstring = "\",";
-                    startIndex = labelSubstringIndex + startSubstring.length;
-                    endIndex = oblastString.indexOf(endSubstring, anchorIndex);
-                    stringCut = oblastString.substring(startIndex, endIndex);
-                    featureObject.properties.label = stringCut;
-                } else if ( labelSubstringCut.startsWith("label = \" [[") ) {
-                    startSubstring = "label = \" [[";
-                    endSubstring = "]]\",";
-                    startIndex = labelSubstringIndex + startSubstring.length;
-                    endIndex = oblastString.indexOf(endSubstring, anchorIndex);
-                    stringCut = oblastString.substring(startIndex, endIndex);
-                    featureObject.properties.label = stringCut;
-                } else if ( labelSubstringCut.startsWith("label = [[") ) {
-                    startSubstring = "label = [[";
-                    endSubstring = "]],";
-                    startIndex = labelSubstringIndex + startSubstring.length;
-                    endIndex = oblastString.indexOf(endSubstring, anchorIndex);
-                    stringCut = oblastString.substring(startIndex, endIndex);
-                    featureObject.properties.label = stringCut;
-                } else if ( labelSubstringCut.startsWith("label =\"") ) {
-                    startSubstring = "label =\"";
-                    endSubstring = "\",";
-                    startIndex = labelSubstringIndex + startSubstring.length;
-                    endIndex = oblastString.indexOf(endSubstring, anchorIndex);
-                    stringCut = oblastString.substring(startIndex, endIndex);
-                    featureObject.properties.label = stringCut;
-                } 
-                
             };
 
-            // extract oblast name
+            // Wikipedia data contains the wrong coordinates for the "Azovstal Metallurgical Combine" in Mariupol
+            // Manually correct it here.
+            if (featureObject.properties.label === "Azovstal Metallurgical Combine") {
+                featureObject.geometry.coordinates = [37.61, 47.098];
+            }
+
+            // EXTRACT OBLAST NAME
             featureObject.properties.oblast = oblastTemplate[i].slice(2);
 
-            // add to GeoJson output
+            // ADD EXTRACTED FEATURE TO THE GEOJSON OBJECT
             outputGeoJson.features.push(featureObject);
 
             // set the anchor index for the next iteration of the loop
@@ -220,7 +171,6 @@ function parseToGeoJson(citiesDataRaw) {
 
             // TEST: Increment test counter for feature extraction test at end of while loop on each oblast
             testCountGeoJson++;
-
         }
 
         // TEST: Run test on each oblast to make sure we've extracted all features from the raw string
@@ -238,19 +188,17 @@ function parseToGeoJson(citiesDataRaw) {
             testLocal = false;
             testGlobal = false;
         }
-        console.log(`Local test pass in ${oblastTemplate[i].slice(2)} = ${testLocal}`)
-
+        console.log(`Local test pass in ${oblastTemplate[i].slice(2)} = ${testLocal}`);
     }
 
     // TEST: Check global parsing test result
-    console.log(`Global test pass in all oblasts = ${testGlobal}`)
+    console.log(`Global test pass in all oblasts = ${testGlobal}`);
 
-    // return the GeoJSON object stringified as JSON
+    // RETURN THE GEOJSON OBJECT AS JSON
     return JSON.stringify(outputGeoJson);
-
 }
 
-// Export loading + parsing functions as single function 
+// EXPORT LOADGING AND PARSING FUNCTIONS AS A SINGLE FUNCTION
 // Remember that async functions always return a promise
 async function loadCitiesGeoJson() { 
     const geoJson = fetchCitiesDataRaw().then(parseToGeoJson);

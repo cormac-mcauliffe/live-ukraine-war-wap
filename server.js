@@ -10,7 +10,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Iniate the self-resetting cache to be the latest Ukraine data fetched from Wikipedia
 // and parsed to GeoJSON
-const citiesDataGeoJson = new DataCache(loadCitiesGeoJson, .5);
+const citiesDataGeoJson = new DataCache(loadCitiesGeoJson, 5);
 
 // performance measurement variables
 let t0, t1;

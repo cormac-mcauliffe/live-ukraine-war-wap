@@ -70,7 +70,11 @@ export default function App() {
                         'circle-stroke-width': 2,
                         'circle-stroke-color': '#F7455D'
                     },
-                    'filter': ['in', ['get', 'mark'], ["literal",["80x80-red-blue-anim.gif","Map-arcNE-red.svg","Map-arcSE-red.svg","Map-circle-red.svg"]]]});
+                    'filter': ['any',
+                        ['in', ['get', 'mark'], ["literal",["80x80-red-blue-anim.gif","Map-arcNE-red.svg","Map-arcSE-red.svg","Map-circle-red.svg"]]],
+                        ['in', ['get', 'label'], ["literal",["Azovstal Metallurgical Combine"]]]
+                    ]
+                });
             })();
         });
     });
