@@ -16,16 +16,24 @@ const citiesDataGeoJson = new DataCache(loadCitiesGeoJson, 5);
 let t0, t1;
 
 // Pull latest version of Ukraine data from the cache and send to client
+// Throw error if backend takes longer than 0.1 seconds to serve from the cache
 app.get('/api/citiesData', async (req, res) => {
-  t0 = performance.now();
-  citiesDataGeoJson.getData()
-    .then(
-      (citiesData) => { 
-        res.send(citiesData);
-        t1 = performance.now();
-        console.log(`Time taken for BE to send wikiData to FE: ${t1 - t0} milliseconds.`); 
-      }
-    );
+  try {
+    t0 = performance.now();
+    citiesDataGeoJson.getData()
+      .then(
+        (citiesData) => { 
+          res.send(citiesData);
+          t1 = performance.now();
+          if ( t1 - t0 > 100 ) {
+            throw new Error(`Perf issue: Backend took ${t1 - t0} milliseconds to serve from the cache`)
+          }
+        }
+      );
+    }
+    catch (error) {
+      console.error(error);
+    }
   }
 );
 

@@ -7,13 +7,6 @@ async function fetchCitiesDataRaw() {
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
         }
-        /* await new Promise((resolve, reject) => {
-            // Force data fectching function to 'await' for 3 seconds to test for 
-            // app response to a server delay
-            setTimeout( function() {
-              resolve("Waited 3 seconds") 
-            }, 3000)
-          });*/
         const citiesDataRaw = await response.text();
         return citiesDataRaw;
     }
@@ -40,18 +33,15 @@ function parseToGeoJson(citiesDataRaw) {
         },
         "properties": {}
     };
-    // index variables
-    let startIndex;
-    let endIndex;
+
     // this anchor index will allow us to maintain and progress our absolute position as we sweep through the string
     let anchorIndex;
-    let startSubstring;
-    let endSubstring;
-    let stringCut;
+    // index variables and variables for storing the string cutting patterns
+    let startIndex, endIndex, startSubstring, endSubstring, stringCut;
+    
     // the 'label =' property extraction from the wikipedia data has 5 different syntax cases. These variables and function will be use to surgically cater for each of the case.
     let labelSubstring = "label =";
-    let labelSubstringIndex;
-    let labelSubstringCut;
+    let labelSubstringIndex, labelSubstringCut;
     function extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut) {
         startIndex = labelSubstringIndex + startSubstring.length;
         endIndex = oblastString.indexOf(endSubstring, startIndex);
@@ -59,12 +49,9 @@ function parseToGeoJson(citiesDataRaw) {
         return stringCut;
     };
 
-    // TEST: test variables
-    let testLocal;
+    // TEST: test variables for error handling
     let testGlobal = true;
-    let testIndex;
-    let testCountRaw;
-    let testCountGeoJson;
+    let testIndex, testCountRaw, testCountGeoJson;
 
     // Iterate through the global raw text string by cutting out the part of string associated with each oblast. Note that the '--' signature substring before each oblast name is necessary for reliable extraction as without it the string 'oblast' sometimes appears mixed inside the cities data as part of the location name data.
     for ( let i = 0; i < (oblastTemplate.length - 1 ); i++ ) {
@@ -109,7 +96,7 @@ function parseToGeoJson(citiesDataRaw) {
 
             // Handle the syntax exceptions
             // A small number of the features on the wiki map do not have labels at all. Manually include a label for these cases.
-            if ((labelSubstringIndex > oblastString.indexOf("{ lat = \"", anchorIndex)) && (oblastString.indexOf("{ lat = \"", anchorIndex) > -1)) { 
+            if (( labelSubstringIndex > oblastString.indexOf("{ lat = \"", anchorIndex)) && (oblastString.indexOf("{ lat = \"", anchorIndex) > -1 )) { 
                 if ( oblastTemplate[i].slice(2) === "Donetsk Oblast") { 
                     featureObject.properties.label = "Horlivka";
                 } else if ( oblastTemplate[i].slice(2) === "Zaporizhzhia Oblast" && featureObject.geometry.coordinates[0] === 36.273) {        
@@ -121,7 +108,7 @@ function parseToGeoJson(citiesDataRaw) {
                 // As long as we are not dealing with one of the features with no label, we can process the labels property as follows. 
                 // Need if statements to handle the four syntax cases that follows the labelSubtring of 'label =' syntax
                 labelSubstringCut = oblastString.substring(labelSubstringIndex);
-                if( labelSubstringCut.startsWith("label = \"[[") ) {
+                if ( labelSubstringCut.startsWith("label = \"[[") ) {
                     startSubstring = "label = \"[[";
                     endSubstring = "]]\",";
                     featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
@@ -146,7 +133,7 @@ function parseToGeoJson(citiesDataRaw) {
 
             // Wikipedia data contains the wrong coordinates for the "Azovstal Metallurgical Combine" in Mariupol
             // Manually correct it here.
-            if (featureObject.properties.label === "Azovstal Metallurgical Combine") {
+            if ( featureObject.properties.label === "Azovstal Metallurgical Combine" ) {
                 featureObject.geometry.coordinates = [37.61, 47.098];
             }
 
@@ -173,26 +160,32 @@ function parseToGeoJson(citiesDataRaw) {
             testCountGeoJson++;
         }
 
-        // TEST: Run test on each oblast to make sure we've extracted all features from the raw string
+        // TEST: Run test on each oblast to make sure we've extracted all features from each raw oblast string 
         testIndex = oblastString.indexOf("{ lat = \"");
-
-        while ( testIndex !== -1 ) {
-            testCountRaw++;
-            testIndex = oblastString.indexOf("{ lat = \"", testIndex + 1);
+        try {
+            while ( testIndex !== -1 ) {
+                testCountRaw++;
+                testIndex = oblastString.indexOf("{ lat = \"", testIndex + 1);
+            }
+            if ( !(testCountRaw === testCountGeoJson) ) {
+                testGlobal = false;
+                throw new Error(`Raw string to GeoJSON parsing error: # features in ${oblastTemplate[i].slice(2)} raw oblast string = ${testCountRaw}. # corresponding oblast features extracted into GeoJSON = ${testCountGeoJson}`);
+            }
         }
-        console.log(`# features in ${oblastTemplate[i].slice(2)} raw oblast string = ${testCountRaw}`);
-        console.log(`# corresponding oblast features extracted into GeoJSON = ${testCountGeoJson}`);
-        if (testCountRaw === testCountGeoJson) {
-            testLocal = true;
-        } else {
-            testLocal = false;
-            testGlobal = false;
+        catch(error) {
+            console.error(error);
         }
-        console.log(`Local test pass in ${oblastTemplate[i].slice(2)} = ${testLocal}`);
     }
 
-    // TEST: Check global parsing test result
-    console.log(`Global test pass in all oblasts = ${testGlobal}`);
+    // TEST: Check global parsing test result to ensure all location features have been extracted from all raw oblast strings
+    try {
+        if ( testGlobal === false ) {
+            throw new Error (`Global error in parsing global raw string to GeoJSON.`)
+        }
+    } 
+    catch(error) {
+        console.error(error);
+    }
 
     // RETURN THE GEOJSON OBJECT AS JSON
     return JSON.stringify(outputGeoJson);
