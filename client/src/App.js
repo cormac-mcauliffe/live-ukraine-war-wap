@@ -7,17 +7,19 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY29ybWFjbWNhIiwiYSI6ImNsMHR2M3d0NTAwNzQzY21vM
 export default function App() {
     const mapContainer = useRef(null);
     const map = useRef(null);
-    const lng = 31.39;
-    const lat = 48.67;
-    const zoom = 5.6;
+    // const lng = 31.39;
+    // const lat = 48.67;
+    // const zoom = 5.6;
 
     useEffect(() => {
         if (map.current) return; // initialize map only once
         map.current = new mapboxgl.Map({
             container: mapContainer.current,
             style: 'mapbox://styles/mapbox/streets-v11',
-            center: [lng, lat],
-            zoom: zoom
+            bounds: [22, 43.8, 40.6, 52.5], // fit initial map load to cover bounding box of Ukraine
+            // center: [lng, lat],
+            // zoom: zoom,
+            minZoom: 3,
         });
         // Add zoom navigation bar
         map.current.addControl(new mapboxgl.NavigationControl({
@@ -85,7 +87,7 @@ export default function App() {
     return (
         <div>
             <div ref={mapContainer} className="map-container" />
-            <div id="state-legend" className="legend">
+            <div id="status-legend" className="legend">
                 <div><span id="russian-control"></span>Russian occupied</div>
                 <div><span id="russian-pressure"></span>Under Russian pressure</div>
                 <p id="wiki-source">Live Russo-Ukrainian war data <br></br> pulled from <a href="https://en.wikipedia.org/wiki/Module:Russo-Ukrainian_War_detailed_map" target="_blank" rel="noopener noreferrer">Wikipedia</a></p>
