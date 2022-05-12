@@ -6,7 +6,6 @@ async function loadGeoJson() {
             throw new Error(`HTTP error: ${response.status}`);
         }
         const citiesDataGeoJsonObj = await response.json();
-        console.log(JSON.stringify(citiesDataGeoJsonObj));
         return citiesDataGeoJsonObj;
     }
     catch(error) {

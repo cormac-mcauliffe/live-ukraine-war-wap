@@ -1,5 +1,5 @@
 {
-    "name": "use-mapbox-gl-js-with-react",
+    "name": "russo-ukrainian-war-map-react-express-client",
     "version": "0.1.0",
     "private": true,
     "proxy": "http://localhost:3001/",
@@ -30,6 +30,9 @@
       "defaults",
       "not ie 11"
     ],
-    "author": "Mapbox",
+    "engines": {
+      "node": "17.0.1"
+    },
+    "author": "Cormac McAuliffe",
     "license": "MIT"
 }

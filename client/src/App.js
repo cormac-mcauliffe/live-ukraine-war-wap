@@ -7,9 +7,6 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY29ybWFjbWNhIiwiYSI6ImNsMHR2M3d0NTAwNzQzY21vM
 export default function App() {
     const mapContainer = useRef(null);
     const map = useRef(null);
-    // const lng = 31.39;
-    // const lat = 48.67;
-    // const zoom = 5.6;
 
     useEffect(() => {
         if (map.current) return; // initialize map only once
@@ -17,8 +14,6 @@ export default function App() {
             container: mapContainer.current,
             style: 'mapbox://styles/mapbox/streets-v11',
             bounds: [22, 43.8, 40.6, 52.5], // fit initial map load to cover bounding box of Ukraine
-            // center: [lng, lat],
-            // zoom: zoom,
             minZoom: 3,
         });
         // Add zoom navigation bar
@@ -33,14 +28,10 @@ export default function App() {
         let citiesObj;
         
         map.current.on('load', () => {
-            // Place all asyn data loading and display logic inside an async IIFE - Immediately Invoked Function Expression
+            // Place all async data loading and display logic inside an async IIFE - Immediately Invoked Function Expression
             // This allows us to only start adding the data to the map until after the promise returned by the imported (and async) function loadCitiesGeoJson has been resolved to the GeoJSON string.
             (async () => { 
                 citiesObj = await loadGeoJson();
-                // parse the JSON to deliver value a GeoJSON obj
-                // citiesObj = await JSON.parse(citiesGeoJson);
-                // If we did not use await above then this would log a promise rather than the GeoJSON object.
-                console.log(citiesObj);
                 // add the geoJSON as a data source to the map
                 map.current.addSource('wikiData', {
                     type: 'geojson',
