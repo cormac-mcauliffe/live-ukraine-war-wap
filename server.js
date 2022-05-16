@@ -1,6 +1,7 @@
 const express = require('express');
 const { loadCitiesGeoJson } = require('./mapdata.js');
 const { DataCache } = require('./datacache.js');
+const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -15,6 +16,7 @@ const citiesDataGeoJson = new DataCache(loadCitiesGeoJson, 5);
 // performance measurement variables
 let t0, t1;
 
+// Api calls
 // Pull latest version of Ukraine data from the cache and send to client
 // Throw error if backend takes longer than 0.1 seconds to serve from the cache
 app.get('/api/citiesData', async (req, res) => {
@@ -36,5 +38,15 @@ app.get('/api/citiesData', async (req, res) => {
     }
   }
 );
+
+if (process.env.NODE_ENV === 'production') {
+  // Serve any static files
+  app.use(express.static(path.join(__dirname, 'client/build')));
+
+  // Handle React routing, return all requests to React app
+  app.get('*', function(req, res) {
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+  });
+}
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
