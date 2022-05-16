@@ -40,10 +40,10 @@ app.get('/api/citiesData', async (req, res) => {
 );
 
 if (process.env.NODE_ENV === 'production') {
-  // Serve any static files
+  // Serve any static files i.e. the React frontend
   app.use(express.static(path.join(__dirname, 'client/build')));
 
-  // Handle React routing, return all requests to React app
+  // All other GET requests not handled above will return the React frontend
   app.get('*', function(req, res) {
     res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
   });
