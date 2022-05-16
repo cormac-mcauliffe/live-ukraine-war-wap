@@ -2,7 +2,7 @@ import React, {useRef, useEffect } from 'react';
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 import loadGeoJson from './wikidata.js';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoiY29ybWFjbWNhIiwiYSI6ImNsMHR2M3d0NTAwNzQzY21vMGlneGF3ZWEifQ.AGMAoX7Am6YDr6DgxIzGDg';
+mapboxgl.accessToken = 'pk.eyJ1IjoiY29ybWFjbWNhIiwiYSI6ImNsMzk4NG9lcDAyem0zam9kOHcya2FzaWwifQ.1FxxEt1_gfpWZRnGtL_oyg';
 
 export default function App() {
     const mapContainer = useRef(null);
