@@ -1,4 +1,4 @@
-// To load GeoJSON data from backend
+// To load GeoJSON data from the backend
 async function loadGeoJson() {
     try {
         const response = await fetch('/api/citiesData');
