@@ -2,7 +2,12 @@ import React, {useRef, useEffect } from 'react';
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 import loadGeoJson from './wikidata.js';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoiY29ybWFjbWNhIiwiYSI6ImNsMzk4NG9lcDAyem0zam9kOHcya2FzaWwifQ.1FxxEt1_gfpWZRnGtL_oyg';
+// Handle production and local dev mode
+if (process.env.NODE_ENV === 'production') {
+    mapboxgl.accessToken = 'pk.eyJ1IjoiY29ybWFjbWNhIiwiYSI6ImNsM2J3b3JibTBqd3Yza25ybDl4dDM1b24ifQ.r2_dFFzUXqa3lo5jCZ2N0A';
+} else {
+    mapboxgl.accessToken = process.env.REACT_APP_LOCAL_DEV_ACCESS_TOKEN;
+};
 
 export default function App() {
     const mapContainer = useRef(null);
