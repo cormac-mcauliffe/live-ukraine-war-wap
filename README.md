@@ -6,4 +6,4 @@ The map shows live-updated locations in Ukraine currently held by Russia and Rus
   
 Link to <a href="https://live-ukraine-war-map.herokuapp.com/" target="_blank" rel="noopener noreferrer">live-ukraine-war-map</a>.
 * Backend: Node.js, Express.js
-* Frontend: React.js and Mapbox GL JS
+* Frontend: React.js, Mapbox GL JS
