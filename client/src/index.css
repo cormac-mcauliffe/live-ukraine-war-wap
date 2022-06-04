@@ -1,3 +1,9 @@
+/* Global CSS variables */
+:root {
+  --russian: #F7455D;
+  --ukrainian: #333EFF;
+}
+
 /* Map */
 body {
   padding: 0px;
@@ -46,13 +52,13 @@ body {
 }
 
 #russian-control {
-  background-color: #F7455D;
-  box-shadow: 0 0 0 1px #F7455D;
+  background-color: var(--russian);
+  box-shadow: 0 0 0 1px var(--russian);
 }
 
 #russian-pressure {
-  background-color: #333EFF;
-  box-shadow: 0 0 0 2px #F7455D;
+  background-color: var(--ukrainian);
+  box-shadow: 0 0 0 2px var(--russian);
 }
 
 #wiki-source {

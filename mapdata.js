@@ -77,6 +77,10 @@ function parseToGeoJson(citiesDataRaw) {
             // longitude
             anchorIndex = endIndex + endSubstring.length; // update the anchor index
             endSubstring = "\", mark = \"";
+            // Wikipedia data contains syntax error for Port of Yevpatoriya. Need to manually remove space within mark template substring
+            if ( oblastTemplate[i].slice(2) === 'Crimea' && featureObject.geometry.coordinates[1] === 45.188617 ) {
+                endSubstring = "\", mark =\"";
+            };
             startIndex = anchorIndex;
             endIndex = oblastString.indexOf(endSubstring, anchorIndex);
             stringCut = oblastString.substring(startIndex, endIndex);
@@ -99,6 +103,8 @@ function parseToGeoJson(citiesDataRaw) {
             if (( labelSubstringIndex > oblastString.indexOf("{ lat = \"", anchorIndex)) && (oblastString.indexOf("{ lat = \"", anchorIndex) > -1 )) { 
                 if ( oblastTemplate[i].slice(2) === "Donetsk Oblast") { 
                     featureObject.properties.label = "Horlivka";
+                } else if ( oblastTemplate[i].slice(2) === "Kharkiv Oblast") { 
+                    featureObject.properties.label = "Ternova";
                 } else if ( oblastTemplate[i].slice(2) === "Zaporizhzhia Oblast" && featureObject.geometry.coordinates[0] === 36.273) {        
                     featureObject.properties.label = "Huliaipole";
                 } else if ( oblastTemplate[i].slice(2) === "Zaporizhzhia Oblast" && featureObject.geometry.coordinates[0] === 35.788 ) {

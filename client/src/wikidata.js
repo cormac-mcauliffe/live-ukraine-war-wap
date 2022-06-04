@@ -5,8 +5,9 @@ async function loadGeoJson() {
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
         }
-        const citiesDataGeoJsonObj = await response.json();
-        return citiesDataGeoJsonObj;
+        //const citiesDataGeoJsonObj = await response.json();
+        //return citiesDataGeoJsonObj;
+        return await response.json();
     }
     catch(error) {
         console.error(`Client failed to load Ukraine data from backend ${error}`)
