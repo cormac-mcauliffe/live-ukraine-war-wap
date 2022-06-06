@@ -39,6 +39,7 @@ app.get('/api/citiesData', async (req, res) => {
   }
 );
 
+// Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
   // Serve any static files i.e. the React frontend
   app.use(express.static(path.join(__dirname, 'client/build')));
