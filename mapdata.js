@@ -77,10 +77,6 @@ function parseToGeoJson(citiesDataRaw) {
             // longitude
             anchorIndex = endIndex + endSubstring.length; // update the anchor index
             endSubstring = "\", mark = \"";
-            // Wikipedia data contains syntax error for Port of Yevpatoriya. Need to manually remove space within mark template substring
-            if ( oblastTemplate[i].slice(2) === 'Crimea' && featureObject.geometry.coordinates[1] === 45.188617 ) {
-                endSubstring = "\", mark =\"";
-            };
             startIndex = anchorIndex;
             endIndex = oblastString.indexOf(endSubstring, anchorIndex);
             stringCut = oblastString.substring(startIndex, endIndex);
@@ -101,9 +97,9 @@ function parseToGeoJson(citiesDataRaw) {
             // Handle the syntax exceptions
             // A small number of the features on the wiki map do not have labels at all. Manually include a label for these cases.
             if (( labelSubstringIndex > oblastString.indexOf("{ lat = \"", anchorIndex)) && (oblastString.indexOf("{ lat = \"", anchorIndex) > -1 )) { 
-                if ( oblastTemplate[i].slice(2) === "Donetsk Oblast") { 
+                if ( oblastTemplate[i].slice(2) === "Donetsk Oblast" && featureObject.geometry.coordinates[0] === 38.030) { 
                     featureObject.properties.label = "Horlivka";
-                } else if ( oblastTemplate[i].slice(2) === "Kharkiv Oblast") { 
+                } else if ( oblastTemplate[i].slice(2) === "Kharkiv Oblast" && featureObject.geometry.coordinates[0] === 36.678) { 
                     featureObject.properties.label = "Ternova";
                 } else if ( oblastTemplate[i].slice(2) === "Zaporizhzhia Oblast" && featureObject.geometry.coordinates[0] === 36.273) {        
                     featureObject.properties.label = "Huliaipole";
@@ -136,12 +132,6 @@ function parseToGeoJson(citiesDataRaw) {
                     featureObject.properties.label = extractLabel(oblastString, labelSubstringIndex, startSubstring, endSubstring, startIndex, endIndex, stringCut);
                 } 
             };
-
-            // Wikipedia data contains the wrong coordinates for the "Azovstal Metallurgical Combine" in Mariupol
-            // Manually correct it here.
-            if ( featureObject.properties.label === "Azovstal Metallurgical Combine" ) {
-                featureObject.geometry.coordinates = [37.61, 47.098];
-            }
 
             // EXTRACT OBLAST NAME
             featureObject.properties.oblast = oblastTemplate[i].slice(2);
